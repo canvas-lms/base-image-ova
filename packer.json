@@ -1,0 +1,39 @@
+{
+  "builders": [
+    {
+      "type": "virtualbox-ovf",
+      "source_path": "../base-image-iso/dist/packer-ubuntu64.ova",
+      "vm_name": "packer-ubuntu64",
+      "output_directory": "dist",
+      "headless": true,
+      "format": "ova",
+      "ssh_username": "ubuntu",
+      "ssh_password": "ubuntu",
+      "shutdown_command": "sudo systemctl poweroff"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo apt -y install software-properties-common",
+        "sudo add-apt-repository -y ppa:brightbox/ruby-ng",
+        "sudo curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -",
+        "sudo curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -",
+        "sudo echo \"deb https://dl.yarnpkg.com/debian/ stable main\" | sudo tee /etc/apt/sources.list.d/yarn.list",
+        "sudo apt -y update",
+        "sudo apt -y install ruby2.4 ruby2.4-dev zlib1g-dev libxml2-dev libsqlite3-dev postgresql-9.5 libpq-dev libxmlsec1-dev curl build-essential nodejs yarn=1.10.1-1 git",
+        "sudo gem install bundler -v 1.13.6",
+        "sudo -u postgres createuser $USER",
+        "sudo -u postgres psql -c \"alter user $USER with superuser\" postgres"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "keep_input_artifact": true,
+      "output": "dist/packer-ubuntu64.box"
+    }
+  ]
+}
